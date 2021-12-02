@@ -32,14 +32,21 @@ namespace Infrastructure.Repository
             return await ApplySpecification(spec).FirstOrDefaultAsync();
         }
 
-        public async Task<List<T>> GetEntityListAsync(ISpecificaton<T> spec)
+        public async Task<IReadOnlyList<T>> GetEntityListAsync(ISpecificaton<T> spec)
         {
-            return await ApplySpecification(spec).ToListAsync<T>();
+            return await ApplySpecification(spec).ToListAsync();
+        }
+
+        public async Task<int> CountAsync(ISpecificaton<T> spec)
+        {
+            return await ApplySpecification(spec).CountAsync();
         }
 
 
         public IQueryable<T> ApplySpecification(ISpecificaton<T> spec){
             return SpecificationEvaluator<T>.GetQuery(_context.Set<T>().AsQueryable(),spec);
         }
+
+        
     }
 }

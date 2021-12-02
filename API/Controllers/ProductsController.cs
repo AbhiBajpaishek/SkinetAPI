@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Errors;
+using API.Helper;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
@@ -30,14 +31,23 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturn>>> GetProducts()
+        public async Task<ActionResult<Pagination<ProductToReturn>>> GetProducts([FromQuery]ProductParams productparams)
         {
-            var products = await _productRepo.GetEntityListAsync(new ProductsWithBrandAndType());
-            return Ok(_mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturn>>(products));
+            var spec = new ProductsWithBrandAndType(productparams);
+
+            var countSpec = new ProductWithFiltersSpecificification(productparams);
+
+            var products = await _productRepo.GetEntityListAsync(spec);
+            var count = await _productRepo.CountAsync(countSpec);
+
+
+            var data = _mapper.Map<IReadOnlyList<Product>,IReadOnlyList<ProductToReturn>>(products);
+
+            return Ok(new Pagination<ProductToReturn>(productparams.PageSize,productparams.PageIndex,count,data));
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProductToReturn),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse),StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Product>> GetProductById(int id)
         {
