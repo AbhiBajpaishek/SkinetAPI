@@ -12,6 +12,7 @@ namespace API.Extensions
         public static void AddApplicationServices(this IServiceCollection services){
             services.AddScoped<IProductRepository,ProductRepository>();
             services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
+            services.AddSingleton<IBasketRepository,BasketRepository>();
             services.Configure<ApiBehaviorOptions>(options => {
                 options.InvalidModelStateResponseFactory = actionContext => {
                     var errors = actionContext.ModelState
